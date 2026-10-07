@@ -18,22 +18,27 @@ export default function Image() {
           justifyContent: "center",
           backgroundColor: "#070A0F",
           padding: "80px",
+          position: "relative",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "24px", marginBottom: "48px" }}>
-          {/* eslint-disable-next-line @next/next/no-img-element -- OG image generation, not browser rendering */}
-          <img
-            src="/azelo-logo.png"
-            alt="AZELO"
-            style={{ width: "auto", height: "80px", objectFit: "contain" }}
-          />
+          <svg
+            viewBox="0 0 100 100"
+            style={{ width: "80px", height: "80px" }}
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path d="M8 84 L40 19 Q42 14 47 14 L53 14 L31 84 Z" fill="#F5F7FA" />
+            <path d="M51 14 Q57 14 60 20 L92 84 L70 84 L48 34 Z" fill="#F5F7FA" />
+            <path d="M35 69 L62 69 L67 79 L30 79 Z" fill="#22D3EE" />
+          </svg>
           <span
             style={{
               fontSize: "72px",
               fontWeight: 800,
               color: "#F5F7FA",
               letterSpacing: "0.075em",
-              fontFamily: "Manrope, system-ui, sans-serif",
+              fontFamily: "system-ui, sans-serif",
               lineHeight: 1,
             }}
           >
@@ -50,10 +55,10 @@ export default function Image() {
             lineHeight: 1.2,
             maxWidth: "900px",
             marginBottom: "20px",
-            fontFamily: "Manrope, system-ui, sans-serif",
+            fontFamily: "system-ui, sans-serif",
           }}
         >
-          AI Automation &amp; Full-Stack Systems
+          AI Automation & Full-Stack Systems
         </div>
 
         <div
@@ -61,7 +66,7 @@ export default function Image() {
             fontSize: "24px",
             color: "#9CA6B5",
             textAlign: "left",
-            fontFamily: "Manrope, system-ui, sans-serif",
+            fontFamily: "system-ui, sans-serif",
           }}
         >
           Build smarter. Automate better.
