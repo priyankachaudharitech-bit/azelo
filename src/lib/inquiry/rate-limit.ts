@@ -150,6 +150,22 @@ export class InMemoryRateLimiter implements RateLimiter {
 /* -------------------------------------------------------------------------- */
 
 /**
+ * Classifies a fetch failure for safe logging (no secrets).
+ */
+function classifyFetchFailure(error: unknown): string {
+  if (error instanceof DOMException && error.name === "TimeoutError") {
+    return "transport timeout";
+  }
+  if (error instanceof TypeError && error.message.includes("fetch")) {
+    return "network failure";
+  }
+  if (error instanceof Error) {
+    return `transport error (${error.name})`;
+  }
+  return "unknown transport failure";
+}
+
+/**
  * Atomic fixed-window increment, expiry and TTL read in one server-side script.
  * `count == 1` means this is the first hit of the window, so this is the only
  * moment an expiry needs to be set.
@@ -208,18 +224,27 @@ export class UpstashRateLimiter implements RateLimiter {
       });
 
       if (!response.ok) {
+        // Safe diagnostics: log HTTP status and error body (no secrets).
+        const errorText = await response.text().catch(() => "<unreadable>");
+        const safeBody = errorText.length > 200 ? errorText.slice(0, 200) + "…" : errorText;
+        console.error(
+          `[inquiry:upstash] HTTP ${response.status} ${response.statusText} — body: ${safeBody}`,
+        );
         return { status: "unavailable", retryAfterSeconds: 0 };
       }
 
       payload = (await response.json()) as unknown;
-    } catch {
-      // Transport error, timeout, or unreadable body. Never log the token.
+    } catch (error) {
+      // Transport error, timeout, or unreadable body. Classify and log safely.
+      const failureType = classifyFetchFailure(error);
+      console.error(`[inquiry:upstash] ${failureType}`);
       return { status: "unavailable", retryAfterSeconds: 0 };
     }
 
     const parsed = parseEvalResult(payload);
 
     if (parsed === null) {
+      console.error("[inquiry:upstash] response parsing failed — unexpected payload shape");
       return { status: "unavailable", retryAfterSeconds: 0 };
     }
 
