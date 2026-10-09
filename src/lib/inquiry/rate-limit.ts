@@ -206,16 +206,19 @@ export class UpstashRateLimiter implements RateLimiter {
     let payload: unknown;
 
     try {
-      const response = await this.#fetch(`${this.#settings.url}/eval`, {
+      // Upstash Redis REST API: generic command endpoint.
+      // POST to base URL with ["EVAL", script, numkeys, key..., arg...]
+      // All arguments must be strings.
+      const response = await this.#fetch(this.#settings.url, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${this.#settings.token}`,
           "Content-Type": "application/json",
         },
-        // Upstash REST EVAL payload: [script, numKeys, key..., arg...]
         body: JSON.stringify([
+          "EVAL",
           FIXED_WINDOW_LUA,
-          1,
+          "1",
           redisKey,
           String(this.#policy.windowMs),
         ]),
